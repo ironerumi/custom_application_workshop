@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Chat App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        // Create a JavaScript variable to store the generated URL
+        var get_response_url = "{{ url_for('send_information') }}";
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>ChatBot</h1>
+            <a href="#">Help</a>
+        </nav>
+    </header>
+    <main>
+        <section class="chat-container">
+            <div class="chat-messages">
+                <div class="message"><span class="bot">Bot:</span> Hello, how can I help you today?</div>
+            </div>
+            <form class="chat-input">
+                <input type="text" placeholder="Type your message..." id="chat_input">
+                <button type="submit"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        &copy; 2024 ChatBot Inc.
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function displayLoading() {
+            $('.chat-messages').append(`<div class="loading-message"><span class="bot-loading">Bot:</span> <span class="loading-dots">...</span></div>`);
+        }
+
+        function displayBotResponse(responseText) {
+            $('.loading-message').remove();
+            // Use `.text()` instead of `.html()` to automatically convert HTML entities.
+            $('.chat-messages').append(`<div class="message"><span class="bot">Bot:</span> <span class="bot-text"></span></div>`);
+            $('.bot-text').last().text(responseText);
+        }
+
+        function displayProcessTime(processTime) {
+            $('.chat-messages').append(`<div class="process-time">Process time: ${processTime.toFixed(2)} seconds</div>`);
+        }
+
+        $(document).ready(function() {
+            $('.chat-input').submit(function(e) {
+                e.preventDefault();
+                let msg = $('#chat_input').val();
+                if (msg.trim() != '') {
+                    $('.chat-messages').append(`<div class="message"><span class="user">You:</span> ${msg}</div>`);
+                    $('#chat_input').val('');
+
+                    displayLoading();
+
+                    $.post(get_response_url, { 'promptText': msg }, function(response) {
+                        displayBotResponse(response.responseText);
+                        displayProcessTime(response.processTime);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
